@@ -5,8 +5,12 @@
 # Raja Selvaraj <rajajs@gmail.com>
 
 # version 0.3
-#  - author : Changyun Lee <python.signal@gmail.com>
-#  - 
+#  - Edited focus loss function to work properly.
+#    (It could be only problem to me since I executed on Windows)
+#  - After using tab to auto-complete, one more tab will move you to next ctrl.
+#  - When used tab to auto-complete, highlight the auto-complete word to dropdown box.
+#  - author: Changyun Lee <python.signal@gmail.com>
+
 # version 0.2
 #  - Added option to use case sensitive matches, default is false
 
@@ -57,6 +61,7 @@ class ACTextControl(wx.TextCtrl):
             gp.Bind ( wx.EVT_MOVE , self._on_focus_loss, gp)
             gp.Bind ( wx.EVT_SIZE , self._on_focus_loss, gp)
             gp = gp.GetParent()
+            
     
     def SetValue(self, value):
         """
@@ -227,7 +232,7 @@ class ACTextControl(wx.TextCtrl):
         # Enter - use current selection for text
         elif event.GetKeyCode() == wx.WXK_RETURN:
             if not visible:
-                #TODO: trigger event?
+                # TODO :
                 pass
             # Add option is only displayed
             elif len(self.select_candidates) == 0:
@@ -258,6 +263,9 @@ class ACTextControl(wx.TextCtrl):
 
         if skip:
             event.Skip()
+
+    
+    
             
 
     def get_choices(self):
@@ -275,7 +283,7 @@ class ACPopup(wx.PopupWindow):
         self.candidatebox = wx.SimpleHtmlListBox(self, -1, choices=[])
         self.SetSize((100, 100))
         self.displayed_candidates = []
-
+        
     def _set_candidates(self, candidates, txt):
         """
         Clear existing candidates and use the supplied candidates
@@ -305,45 +313,57 @@ class ACPopup(wx.PopupWindow):
             return text
 
         else:
-            return text.replace(substring, '<span style="color:red;font-weight:bold;">' + substring + '</span>', 1)
+            t = []
+            for i in range(len(text)):
+                if text[i].isupper():
+                    t.append(text[i].replace(substring.upper(), '<span style="color:red;font-weight:bold;">' + substring.upper() + '</span>'))
+                else:
+                    t.append(text[i].replace(substring, '<span style="color:red;font-weight:bold;">' + substring + '</span>'))
 
-def test():
-    app = wx.PySimpleApp()
-    frm = wx.Frame(None, -1, "Test", style=wx.DEFAULT_FRAME_STYLE)
-    panel = wx.Panel(frm)
-    
-    candidates = ['cat', 'Cow', 'dog', 'rat', 'Raccoon', 'pig',
-               'tiger', 'elephant', 'ant',
-               'horse', 'Anteater', 'giraffe', u'테스트', u'안녕']
+            s = ''
+            return s.join(t)
 
-    label1 = wx.StaticText(panel, -1, 'Matches anywhere in string')
-    label2 = wx.StaticText(panel, -1, 'Matches only at beginning')
-    label3 = wx.StaticText(panel, -1, 'Matches at beginning, case sensitive')
-    label4 = wx.StaticText(panel, -1, 'Allows new candidates to be added')
-               
-    ctrl1 = ACTextControl(panel, candidates=candidates, add_option=False)
-    ctrl2 = ACTextControl(panel, candidates=candidates, match_at_start=True, add_option=False)
-    ctrl3 = ACTextControl(panel, candidates=candidates, match_at_start=True,
-                          add_option=False, case_sensitive=True)
-    ctrl4 = ACTextControl(panel, candidates=candidates, add_option=True)
-    
 
-    fgsizer = wx.FlexGridSizer(rows=5, cols=2, vgap=20, hgap=10)
-    fgsizer.AddMany([label1, ctrl1,
-                     label2, ctrl2,
-                     label3, ctrl3,
-                     label4, ctrl4])
+class TestFrame(wx.Frame):
+    def __init__(self, parent, id):
+        wx.Frame.__init__(self, parent, id, "Test")
+        panel = wx.Panel(self)
     
-    panel.SetAutoLayout(True)
-    panel.SetSizer(fgsizer)
-    fgsizer.Fit(panel)
+        candidates = ['cat', 'Cow', 'dog', 'rat', 'Raccoon', 'pig',
+                   'tiger', 'elephant', 'ant',
+                   'horse', 'Anteater', 'giraffe', u'테스트', u'안녕']
     
-    panel.Layout()
-    app.SetTopWindow(frm)
-    frm.SetSize((400, 250))
-    frm.Show()
-    #ctrl1.SetValue('cat')
-    app.MainLoop()
+        label1 = wx.StaticText(panel, -1, 'Matches anywhere in string')
+        label2 = wx.StaticText(panel, -1, 'Matches only at beginning')
+        label3 = wx.StaticText(panel, -1, 'Matches at beginning, case sensitive')
+        label4 = wx.StaticText(panel, -1, 'Allows new candidates to be added')
+                   
+        self.ctrl1 = ACTextControl(panel, candidates=candidates, add_option=False)
+        self.ctrl2 = ACTextControl(panel, candidates=candidates, match_at_start=True, add_option=False)
+        self.ctrl3 = ACTextControl(panel, candidates=candidates, match_at_start=True,
+                              add_option=False, case_sensitive=True)
+        self.ctrl4 = ACTextControl(panel, candidates=candidates, add_option=True)
+        
+    
+        fgsizer = wx.FlexGridSizer(rows=5, cols=2, vgap=20, hgap=10)
+        fgsizer.AddMany([label1, self.ctrl1,
+                         label2, self.ctrl2,
+                         label3, self.ctrl3,
+                         label4, self.ctrl4])
+        
+        panel.SetAutoLayout(True)
+        panel.SetSizer(fgsizer)
+        fgsizer.Fit(panel)
+        panel.Layout()
+
+class TestApp(wx.App):
+    def OnInit(self):
+        frame = TestFrame(None, -1)
+        self.SetTopWindow(frame)
+        frame.SetSize((400, 250))
+        frame.Show()
+        return True
 
 if __name__ == '__main__':
-    test()
+    app = TestApp()
+    app.MainLoop()
