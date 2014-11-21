@@ -8,6 +8,7 @@ The widget is designed to present a textctrl into which the user starts typing.
 [ previous ]
 
 ■ Matches (configurable to matches at beginning or matches anywhere) to the typed text will appear in a dropdown box.
+-
 ■ Up and down arrow keys can be used to navigate among the matches.
 ■ Enter key will populate the textctrl with the selected match.
 ■ Tab key will expand the entered text to the current match.
