@@ -22,3 +22,5 @@ When used tab to auto-complete, highlight the auto-complete word to dropdown box
 Unicode works perfect ! Just add unicode type to candidates list.
 
 I have tested on Windows 8 with Python 2.7 and Wxpython 3.0. I hope this works fine on other operation system.
+
+![alt tag](https://github.com/Ezpy/ACTextCtrl/blob/master/screenshot.png)
