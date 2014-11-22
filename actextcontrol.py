@@ -181,8 +181,8 @@ class ACTextControl(wx.TextCtrl):
 
         else:
             # additional 3 lines needed to show all candidates without scrollbar        
-            candidate_count = min(self.max_candidates, len(candidates)) + 2.5
-            longest = max([len(candidate) for candidate in candidates]) + 4
+            candidate_count = min(self.max_candidates, len(candidates)) + 4
+            longest = max([len(candidate) for candidate in candidates]) + 6
 
         
         charheight = self.popup.candidatebox.GetCharHeight()
@@ -308,21 +308,48 @@ class ACPopup(wx.PopupWindow):
         For displaying in the popup, format the text
         to highlight the substring in html
         """
+        sc = len(substring) # substring count
+        span_s = '<span style="color:red;font-weight:bold;">'
+        span_e = '</span>'
         # empty substring
-        if len(substring) == 0:
+        if sc == 0:
             return text
 
-        else:
+        elif sc == 1:
             t = []
             for i in range(len(text)):
                 if text[i].isupper():
-                    t.append(text[i].replace(substring.upper(), '<span style="color:red;font-weight:bold;">' + substring.upper() + '</span>'))
+                    t.append(text[i].replace(substring.upper(), span_s + substring.upper() + span_e))
                 else:
-                    t.append(text[i].replace(substring, '<span style="color:red;font-weight:bold;">' + substring + '</span>'))
+                    t.append(text[i].replace(substring, span_s + substring + span_e))
 
             s = ''
             return s.join(t)
-
+        else:
+            i = []
+            word = text
+            while True:
+                index = word.lower().find(substring.lower())
+                if index == -1:
+                    break
+                else:
+                    if len(i) == 0:
+                        i.append(index)
+                    else:
+                        i.append(index+i[-1]+sc)
+                    word = word[index+sc:]
+            t = ''
+            i.sort()
+            for m in range(len(i)):
+                _i = i[m]
+                if m == 0:
+                    t += text[:_i]+span_s+text[_i:_i+sc]+span_e
+                else:
+                    t += text[i[m-1]+sc:_i]+span_s+text[_i:_i+sc]+span_e
+                if m == len(i)-1:
+                    if _i+sc < len(text):
+                        t += text[_i+sc:]
+        return t
 
 class TestFrame(wx.Frame):
     def __init__(self, parent, id):
